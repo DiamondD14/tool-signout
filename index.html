@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ener.co Tool Sign-Out</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+  }
+  header {
+    background: #d32f2f;
+    color: white;
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  header p { margin: 4px 0 0; font-size: 13px; opacity: 0.9; }
+
+  .tabs {
+    display: flex;
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    position: sticky;
+    top: 64px;
+    z-index: 9;
+  }
+  .tab {
+    flex: 1;
+    padding: 14px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+  }
+  .tab.active {
+    color: #d32f2f;
+    border-bottom-color: #d32f2f;
+  }
+  .badge {
+    display: inline-block;
+    background: #d32f2f;
+    color: white;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  .container { padding: 16px; max-width: 700px; margin: 0 auto; }
+
+  .search-box {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
+    border: 1px solid #d0d0d0;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    background: white;
+  }
+
+  .tool-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .tool-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .tool-card:active { transform: scale(0.97); }
+  .tool-card.checked-out {
+    background: #fff3e0;
+    border-color: #ffb74d;
+  }
+  .tool-name {
+    font-weight: 600;
+    font-size: 15px;
+    margin: 0 0 6px;
+    line-height: 1.3;
+  }
+  .tool-status {
+    font-size: 12px;
+    color: #666;
+  }
+  .tool-status.out { color: #e65100; font-weight: 500; }
+
+  /* Modal */
+  .modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: white;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px;
+    animation: slideup 0.2s ease-out;
+  }
+  @keyframes slideup {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .modal h2 { margin: 0 0 4px; font-size: 20px; }
+  .modal .sub { color: #666; font-size: 14px; margin: 0 0 20px; }
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 6px;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #d0d0d0;
+    border-radius: 10px;
+    background: white;
+    font-family: inherit;
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: #d32f2f;
+  }
+
+  .optional-toggle {
+    background: none;
+    border: none;
+    color: #d32f2f;
+    font-size: 14px;
+    padding: 8px 0;
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
+  .optional-fields { display: none; }
+  .optional-fields.show { display: block; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 8px; }
+  .btn {
+    flex: 1;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-primary { background: #d32f2f; color: white; }
+  .btn-primary:active { background: #b71c1c; }
+  .btn-secondary { background: #f0f0f0; color: #333; }
+  .btn-return { background: #2e7d32; color: white; }
+  .btn-return:active { background: #1b5e20; }
+
+  /* Activity / out-now lists */
+  .activity-item {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .activity-info { flex: 1; }
+  .activity-tool { font-weight: 600; font-size: 14px; }
+  .activity-meta { font-size: 12px; color: #666; margin-top: 2px; }
+  .activity-action {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  .action-out { background: #fff3e0; color: #e65100; }
+  .action-in { background: #e8f5e9; color: #2e7d32; }
+
+  .empty {
+    text-align: center;
+    color: #999;
+    padding: 40px 20px;
+    font-size: 14px;
+  }
+
+  /* Hide views not active */
+  .view { display: none; }
+  .view.active { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Ener.co Tool Sign-Out</h1>
+  <p>Kit A — Tool Bag</p>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-view="tools">Tools</div>
+  <div class="tab" data-view="out">Out Now <span class="badge" id="out-count">0</span></div>
+  <div class="tab" data-view="history">History</div>
+</div>
+
+<div class="container">
+
+  <div class="view active" id="view-tools">
+    <input type="text" class="search-box" id="search" placeholder="Search tools...">
+    <div class="tool-grid" id="tool-grid"></div>
+  </div>
+
+  <div class="view" id="view-out">
+    <div id="out-list"></div>
+  </div>
+
+  <div class="view" id="view-history">
+    <div id="history-list"></div>
+  </div>
+
+</div>
+
+<!-- Sign-out modal -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h2 id="modal-title">Sign out tool</h2>
+    <p class="sub" id="modal-tool"></p>
+
+    <div class="field">
+      <label>Your name *</label>
+      <input type="text" id="name-input" placeholder="e.g. Mike Smith" autocomplete="name">
+    </div>
+
+    <button class="optional-toggle" id="toggle-opt">+ Add condition or return date (optional)</button>
+
+    <div class="optional-fields" id="opt-fields">
+      <div class="field">
+        <label>Condition</label>
+        <select id="condition-input">
+          <option value="">— not specified —</option>
+          <option value="Good">Good</option>
+          <option value="Fair">Fair</option>
+          <option value="Needs repair">Needs repair</option>
+          <option value="Damaged">Damaged</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Expected return date</label>
+        <input type="date" id="return-input">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="cancel-btn">Cancel</button>
+      <button class="btn btn-primary" id="confirm-btn">Sign out</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ TOOL LIST ============
+// Edit this list anytime to add or remove tools.
+const TOOLS = [
+  "Milwaukee Tool Bag",
+  "Drill and impact drive bit kit",
+  "Pliers",
+  "Vice grips (2ct)",
+  "Hammer",
+  "spatchulas / paint scrapers",
+  "Cast Iron Pipe Wrench",
+  "adjustable wrench",
+  "Drill Batteries",
+  "Flat Head Screwdriver",
+  "Zip tie 14in (100-pack)",
+  "3 piece 9/16th set",
+  "5 in needle nose",
+  "Allen keys SAE",
+  "Tape Measure",
+  "Lock for bag",
+  "Utility Knives",
+  "Grinder Blades (15 ct)",
+  "Multi Tool",
+  "Fin combs sets",
+  "Voltage Pen",
+  "Allen key Torx",
+  "pens",
+  "Spanner wrench and Lock Nut",
+  "Phillips Head Screwdriver",
+  "Needle Nose Pliers",
+  "Dyke / Cutting Pliers",
+  "Milwaukee Impact Driver",
+  "Milwaukee Drill Driver",
+  "Mini Flashlight",
+  "Sharpies",
+  "PPM and PH meter",
+  "Phone cable charger",
+  "Lockout Tags",
+  "Dielectric Lockout Padlock",
+  "Phone Charger Box",
+  "Lockout Hasps",
+  "9V Battery",
+  "Allen key Metric"
+];
+
+// ============ STATE ============
+// state.checkedOut: { "toolName": { name, condition, returnDate, dateOut } }
+// state.history: [{ tool, name, action: "out"|"in", time }]
+let state = JSON.parse(localStorage.getItem("toolSignout") || '{"checkedOut":{},"history":[]}');
+
+function save() {
+  localStorage.setItem("toolSignout", JSON.stringify(state));
+}
+
+// ============ RENDER ============
+function renderTools() {
+  const search = document.getElementById("search").value.toLowerCase();
+  const grid = document.getElementById("tool-grid");
+  const filtered = TOOLS.filter(t => t.toLowerCase().includes(search));
+  grid.innerHTML = filtered.map(tool => {
+    const out = state.checkedOut[tool];
+    const cls = out ? "tool-card checked-out" : "tool-card";
+    const status = out
+      ? `<div class="tool-status out">Out: ${out.name}</div>`
+      : `<div class="tool-status">Available</div>`;
+    return `<div class="${cls}" data-tool="${escapeAttr(tool)}">
+      <p class="tool-name">${escapeHtml(tool)}</p>
+      ${status}
+    </div>`;
+  }).join("");
+}
+
+function renderOut() {
+  const list = document.getElementById("out-list");
+  const entries = Object.entries(state.checkedOut);
+  document.getElementById("out-count").textContent = entries.length;
+  if (entries.length === 0) {
+    list.innerHTML = `<div class="empty">No tools currently checked out</div>`;
+    return;
+  }
+  list.innerHTML = entries.map(([tool, info]) => {
+    const days = daysSince(info.dateOut);
+    return `<div class="activity-item">
+      <div class="activity-info">
+        <div class="activity-tool">${escapeHtml(tool)}</div>
+        <div class="activity-meta">${escapeHtml(info.name)} • ${days}${info.condition ? ' • ' + escapeHtml(info.condition) : ''}</div>
+      </div>
+      <button class="btn btn-return" style="flex:none;padding:8px 14px;font-size:13px;" data-return="${escapeAttr(tool)}">Return</button>
+    </div>`;
+  }).join("");
+}
+
+function renderHistory() {
+  const list = document.getElementById("history-list");
+  if (state.history.length === 0) {
+    list.innerHTML = `<div class="empty">No activity yet</div>`;
+    return;
+  }
+  list.innerHTML = state.history.slice().reverse().map(h => {
+    return `<div class="activity-item">
+      <div class="activity-info">
+        <div class="activity-tool">${escapeHtml(h.tool)}</div>
+        <div class="activity-meta">${escapeHtml(h.name)} • ${formatTime(h.time)}</div>
+      </div>
+      <span class="activity-action ${h.action === 'out' ? 'action-out' : 'action-in'}">${h.action === 'out' ? 'Signed out' : 'Returned'}</span>
+    </div>`;
+  }).join("");
+}
+
+function renderAll() { renderTools(); renderOut(); renderHistory(); }
+
+// ============ MODAL ============
+let pendingTool = null;
+function openModal(tool) {
+  pendingTool = tool;
+  document.getElementById("modal-tool").textContent = tool;
+  document.getElementById("name-input").value = "";
+  document.getElementById("condition-input").value = "";
+  document.getElementById("return-input").value = "";
+  document.getElementById("opt-fields").classList.remove("show");
+  document.getElementById("modal").classList.add("show");
+  setTimeout(() => document.getElementById("name-input").focus(), 200);
+}
+function closeModal() {
+  document.getElementById("modal").classList.remove("show");
+  pendingTool = null;
+}
+
+// ============ ACTIONS ============
+function confirmSignOut() {
+  const name = document.getElementById("name-input").value.trim();
+  if (!name) { alert("Please enter your name"); return; }
+  const condition = document.getElementById("condition-input").value;
+  const returnDate = document.getElementById("return-input").value;
+  const now = Date.now();
+  state.checkedOut[pendingTool] = {
+    name, condition, returnDate, dateOut: now
+  };
+  state.history.push({ tool: pendingTool, name, action: "out", time: now });
+  save(); renderAll(); closeModal();
+}
+
+function returnTool(tool) {
+  const info = state.checkedOut[tool];
+  if (!info) return;
+  if (!confirm(`Return "${tool}"?`)) return;
+  state.history.push({ tool, name: info.name, action: "in", time: Date.now() });
+  delete state.checkedOut[tool];
+  save(); renderAll();
+}
+
+// ============ HELPERS ============
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s) { return escapeHtml(s); }
+function daysSince(ts) {
+  const d = Math.floor((Date.now() - ts) / 86400000);
+  if (d === 0) return "today";
+  if (d === 1) return "1 day ago";
+  return d + " days ago";
+}
+function formatTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+// ============ EVENT WIRING ============
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    document.getElementById("view-" + t.dataset.view).classList.add("active");
+  });
+});
+
+document.getElementById("search").addEventListener("input", renderTools);
+
+document.getElementById("tool-grid").addEventListener("click", e => {
+  const card = e.target.closest(".tool-card");
+  if (!card) return;
+  const tool = card.dataset.tool;
+  if (state.checkedOut[tool]) {
+    returnTool(tool);
+  } else {
+    openModal(tool);
+  }
+});
+
+document.getElementById("out-list").addEventListener("click", e => {
+  const btn = e.target.closest("[data-return]");
+  if (!btn) return;
+  returnTool(btn.dataset.return);
+});
+
+document.getElementById("toggle-opt").addEventListener("click", () => {
+  document.getElementById("opt-fields").classList.toggle("show");
+});
+document.getElementById("cancel-btn").addEventListener("click", closeModal);
+document.getElementById("confirm-btn").addEventListener("click", confirmSignOut);
+document.getElementById("modal").addEventListener("click", e => {
+  if (e.target.id === "modal") closeModal();
+});
+
+renderAll();
+</script>
+</body>
+</html>
