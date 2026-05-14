@@ -281,9 +281,10 @@
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
 <script>
-// ============ TOOL LIST ============
-// Edit this list anytime to add or remove tools.
 const TOOLS = [
   "Milwaukee Tool Bag",
   "Drill and impact drive bit kit",
@@ -326,16 +327,29 @@ const TOOLS = [
   "Allen key Metric"
 ];
 
-// ============ STATE ============
-// state.checkedOut: { "toolName": { name, condition, returnDate, dateOut } }
-// state.history: [{ tool, name, action: "out"|"in", time }]
-let state = JSON.parse(localStorage.getItem("toolSignout") || '{"checkedOut":{},"history":[]}');
+const firebaseConfig = {
+  apiKey: "AIzaSyD6R0svlQBY9t8jH4lpiMVoRdmYr7iBT6s",
+  authDomain: "tool-signout-crew.firebaseapp.com",
+  databaseURL: "https://tool-signout-crew-default-rtdb.firebaseio.com",
+  projectId: "tool-signout-crew",
+  storageBucket: "tool-signout-crew.firebasestorage.app",
+  messagingSenderId: "11417927751",
+  appId: "1:11417927751:web:9c30df3a3e1213033ef162"
+};
+firebase.initializeApp(firebaseConfig);
+const dbRef = firebase.database().ref("toolSignout");
+
+let state = { checkedOut: {}, history: [] };
+
+dbRef.on("value", snap => {
+  state = snap.val() || { checkedOut: {}, history: [] };
+  renderAll();
+});
 
 function save() {
-  localStorage.setItem("toolSignout", JSON.stringify(state));
+  dbRef.set(state);
 }
 
-// ============ RENDER ============
 function renderTools() {
   const search = document.getElementById("search").value.toLowerCase();
   const grid = document.getElementById("tool-grid");
@@ -392,7 +406,6 @@ function renderHistory() {
 
 function renderAll() { renderTools(); renderOut(); renderHistory(); }
 
-// ============ MODAL ============
 let pendingTool = null;
 function openModal(tool) {
   pendingTool = tool;
@@ -409,16 +422,13 @@ function closeModal() {
   pendingTool = null;
 }
 
-// ============ ACTIONS ============
 function confirmSignOut() {
   const name = document.getElementById("name-input").value.trim();
   if (!name) { alert("Please enter your name"); return; }
   const condition = document.getElementById("condition-input").value;
   const returnDate = document.getElementById("return-input").value;
   const now = Date.now();
-  state.checkedOut[pendingTool] = {
-    name, condition, returnDate, dateOut: now
-  };
+  state.checkedOut[pendingTool] = { name, condition, returnDate, dateOut: now };
   state.history.push({ tool: pendingTool, name, action: "out", time: now });
   save(); renderAll(); closeModal();
 }
@@ -432,7 +442,6 @@ function returnTool(tool) {
   save(); renderAll();
 }
 
-// ============ HELPERS ============
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escapeAttr(s) { return escapeHtml(s); }
 function daysSince(ts) {
@@ -446,7 +455,6 @@ function formatTime(ts) {
   return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
-// ============ EVENT WIRING ============
 document.querySelectorAll(".tab").forEach(t => {
   t.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
@@ -483,8 +491,6 @@ document.getElementById("confirm-btn").addEventListener("click", confirmSignOut)
 document.getElementById("modal").addEventListener("click", e => {
   if (e.target.id === "modal") closeModal();
 });
-
-renderAll();
 </script>
 </body>
 </html>
