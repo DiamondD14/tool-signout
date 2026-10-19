@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Warehouse Surplus Sale — Ener.co</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; color: #1a1a1a; min-height: 100vh; }
+    header { background: #fff; border-bottom: 1px solid #e5e5e5; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 20; }
+    .logo { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; color: #1a1a1a; text-decoration: none; }
+    .logo span { color: #2563eb; }
+    .hdr-r { display: flex; align-items: center; gap: 14px; }
+    .back { font-size: .85rem; color: #6b7280; text-decoration: none; }
+    .back:hover { color: #1a1a1a; }
+    .role { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 5px 10px; border-radius: 99px; border: 1px solid #d1d5db; background: #fff; color: #374151; cursor: pointer; font-family: inherit; }
+    .role.employee { background: #ccfbf1; border-color: #5eead4; color: #0f766e; }
+    .role.admin { background: #1a1a1a; border-color: #1a1a1a; color: #fff; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 36px 32px 60px; }
+    h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 6px; }
+    .sub { color: #6b7280; margin-bottom: 20px; max-width: 640px; line-height: 1.5; }
+    .banner { border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; font-size: .9rem; line-height: 1.5; border: 1px solid; }
+    .banner b { font-weight: 700; }
+    .banner-staff { background: linear-gradient(135deg,#f0fdfa,#fff); border-color: #5eead4; color: #134e4a; }
+    .banner-public { background: linear-gradient(135deg,#eff6ff,#fff); border-color: #93c5fd; color: #1e3a8a; }
+    .banner-wait { background: linear-gradient(135deg,#fffbeb,#fff); border-color: #fcd34d; color: #78350f; }
+
+    .tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+    .tab { font: inherit; font-size: .85rem; font-weight: 600; padding: 8px 14px; border-radius: 99px; border: 1px solid #d1d5db; background: #fff; color: #374151; cursor: pointer; }
+    .tab.on { background: #1a1a1a; border-color: #1a1a1a; color: #fff; }
+    .tab .n { font-size: .7rem; background: #ef4444; color: #fff; border-radius: 99px; padding: 1px 6px; margin-left: 4px; }
+
+    .toolbar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .toolbar input, .toolbar select { font: inherit; font-size: .9rem; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; }
+    .toolbar input { flex: 1; min-width: 180px; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .item { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; transition: box-shadow .15s, border-color .15s; }
+    .item:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); border-color: #d1d5db; }
+    .item.dim { opacity: .62; }
+    .thumb { aspect-ratio: 4/3; background: #f3f4f6 center/cover no-repeat; position: relative; }
+    .thumb.none { display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: .8rem; }
+    .tag { position: absolute; top: 10px; left: 10px; font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 3px 8px; border-radius: 99px; background: #fff; color: #374151; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+    .tag.hold { background: #fef3c7; color: #92400e; } .tag.sold { background: #1a1a1a; color: #fff; }
+    .tag.bid { background: #ede9fe; color: #5b21b6; } .tag.draft { background: #fee2e2; color: #b91c1c; }
+    .pc { position: absolute; bottom: 8px; right: 8px; font-size: .68rem; background: rgba(0,0,0,.6); color: #fff; padding: 2px 7px; border-radius: 99px; }
+    .ib { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .it { font-weight: 600; font-size: .95rem; line-height: 1.3; }
+    .im { font-size: .76rem; color: #6b7280; }
+    .price { margin-top: auto; padding-top: 8px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+    .p-main { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    .p-staff { color: #0f766e; }
+    .p-strike { font-size: .82rem; color: #9ca3af; text-decoration: line-through; }
+    .p-off { font-size: .68rem; font-weight: 700; color: #0f766e; background: #ccfbf1; padding: 2px 6px; border-radius: 99px; }
+    .comp { font-size: .74rem; color: #6b7280; line-height: 1.4; }
+    .empty { text-align: center; color: #9ca3af; padding: 60px 20px; font-size: .9rem; background: #fff; border: 1px dashed #d1d5db; border-radius: 12px; }
+
+    .btn { font: inherit; font-size: .9rem; font-weight: 700; border: none; border-radius: 8px; padding: 11px 18px; cursor: pointer; background: #0d9488; color: #fff; }
+    .btn:hover { background: #0f766e; }
+    .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+    .btn-dark { background: #1a1a1a; } .btn-dark:hover { background: #000; }
+    .btn-ghost { background: #fff; color: #374151; border: 1px solid #d1d5db; } .btn-ghost:hover { background: #f9fafb; }
+    .btn-danger { background: #fff; color: #b91c1c; border: 1px solid #fca5a5; } .btn-danger:hover { background: #fef2f2; }
+    .btn-sm { font-size: .78rem; padding: 6px 12px; border-radius: 7px; }
+
+    .drop { border: 2px dashed #5eead4; background: linear-gradient(135deg,#f0fdfa,#fff); border-radius: 12px; padding: 22px; text-align: center; margin-bottom: 18px; color: #134e4a; font-size: .9rem; line-height: 1.6; }
+    .drop.over { border-color: #0d9488; background: #ccfbf1; }
+    .drop .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+    .drop label.opt { font-size: .82rem; display: inline-flex; align-items: center; gap: 6px; }
+
+    /* Modal */
+    .mbg { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 100; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 40px 16px; }
+    .mbg.show { display: flex; }
+    .modal { background: #fff; width: 100%; max-width: 720px; border-radius: 14px; padding: 24px; position: relative; }
+    .modal.narrow { max-width: 420px; }
+    .modal h2 { font-size: 1.25rem; letter-spacing: -0.02em; margin-bottom: 4px; padding-right: 30px; }
+    .x { position: absolute; top: 14px; right: 14px; border: none; background: #f3f4f6; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; color: #374151; }
+    .gal { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 14px 0; }
+    .gal-main { width: 100%; aspect-ratio: 4/3; object-fit: contain; background: #f3f4f6; border-radius: 10px; }
+    .gal-strip { display: flex; gap: 6px; overflow-x: auto; }
+    .gal-strip img { width: 64px; height: 48px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
+    .gal-strip img.on { border-color: #0d9488; }
+    .kv { display: grid; grid-template-columns: 140px 1fr; gap: 6px 12px; font-size: .86rem; margin: 12px 0; }
+    .kv dt { color: #6b7280; } .kv dd { color: #1a1a1a; }
+    .desc { font-size: .9rem; line-height: 1.55; color: #374151; white-space: pre-wrap; margin: 10px 0; }
+    .box { border: 1px solid #e5e5e5; border-radius: 10px; padding: 14px 16px; margin-top: 14px; }
+    .box h3 { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #6b7280; margin-bottom: 10px; }
+    .act { display: flex; justify-content: space-between; gap: 10px; font-size: .84rem; padding: 7px 0; border-bottom: 1px solid #f3f4f6; align-items: center; }
+    .act:last-child { border-bottom: none; }
+    .act .t { color: #9ca3af; font-size: .74rem; }
+    .act.top { font-weight: 700; color: #0f766e; }
+
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: .78rem; font-weight: 600; color: #374151; margin-bottom: 5px; }
+    .field input, .field select, .field textarea { width: 100%; font: inherit; font-size: .9rem; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; }
+    .field textarea { resize: vertical; min-height: 70px; }
+    .field .hint { font-size: .74rem; color: #9ca3af; margin-top: 4px; }
+    .f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .f3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .sect { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #0f766e; margin: 18px 0 8px; padding-top: 14px; border-top: 1px solid #f3f4f6; }
+    .sect.adm { color: #b91c1c; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .ph-edit { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ph-edit div { position: relative; }
+    .ph-edit img { width: 84px; height: 63px; object-fit: cover; border-radius: 6px; display: block; }
+    .ph-edit button { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; border: none; background: #b91c1c; color: #fff; font-size: .7rem; cursor: pointer; }
+    .sugg { font-size: .76rem; color: #0f766e; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; padding: 8px 10px; margin-bottom: 12px; line-height: 1.45; }
+    .cat-res { border: 1px solid #e5e5e5; border-radius: 8px; max-height: 180px; overflow-y: auto; margin-top: 4px; display: none; }
+    .cat-res.show { display: block; }
+    .cat-res div { padding: 7px 10px; font-size: .82rem; cursor: pointer; display: flex; justify-content: space-between; gap: 8px; }
+    .cat-res div:hover { background: #f0fdfa; }
+
+    /* Report */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .stat { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; }
+    .stat .l { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #9ca3af; }
+    .stat .v { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin-top: 4px; }
+    .stat .s { font-size: .74rem; color: #6b7280; margin-top: 2px; }
+    .stat.loss .v { color: #b91c1c; }
+    .tbl-wrap { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid #f3f4f6; white-space: nowrap; }
+    th { font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: #6b7280; background: #fafafa; }
+    td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+    tfoot td { font-weight: 700; border-top: 2px solid #e5e5e5; }
+    .neg { color: #b91c1c; }
+    .note-s { font-size: .78rem; color: #6b7280; line-height: 1.5; margin-top: 12px; }
+
+    .inq { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; font-size: .86rem; line-height: 1.5; }
+    .inq .top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .inq .t { color: #9ca3af; font-size: .76rem; }
+
+    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: .85rem; font-weight: 600; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 200; max-width: 90vw; text-align: center; }
+    #toast.show { opacity: 1; }
+    .hide { display: none !important; }
+    @media(max-width:640px){
+      .wrap{padding:24px 16px 48px} header{padding:14px 16px}
+      .f2,.f3{grid-template-columns:1fr} .kv{grid-template-columns:110px 1fr}
+      .grid{grid-template-columns:1fr 1fr; gap:10px} .ib{padding:10px 12px 12px} .p-main{font-size:1.05rem}
+      .mbg{padding:0} .modal{border-radius:0; min-height:100vh}
+    }
+    @media print {
+      header, .tabs, .toolbar, .drop, #toast, .no-print { display:none !important }
+      body{background:#fff} .wrap{padding:0;max-width:none} .tbl-wrap,.stat{border-color:#ccc}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <a class="logo" href="/">Ener<span>.</span>co</a>
+  <div class="hdr-r">
+    <a class="back" href="/warehouse-hub">&larr; Warehouse Hub</a>
+    <button class="role" id="role-btn">Staff sign in</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <h1>🏷️ Warehouse Surplus Sale</h1>
+  <p class="sub">Equipment we're no longer using, pulled from the Ener.co warehouse. Everything is used and sold as-is, pickup only.</p>
+  <div id="banner"></div>
+
+  <div class="tabs hide" id="tabs">
+    <button class="tab on" data-tab="listings">Listings</button>
+    <button class="tab" data-tab="inbox">Public requests <span class="n hide" id="inbox-n"></span></button>
+    <button class="tab" data-tab="report">Loss report</button>
+    <button class="tab" data-tab="settings">Sale settings</button>
+  </div>
+
+  <section id="tab-listings">
+    <div class="drop hide" id="drop">
+      <b>Drop your photos here</b> (or tap to pick them). Each photo becomes a draft listing that only admins can see.<br>
+      Then open each draft, match it to the kit inventory to pull in what we paid, and set the prices.
+      <div class="row">
+        <label class="opt"><input type="checkbox" id="drop-group"> Put all of these photos in <b>one</b> listing</label>
+        <button class="btn btn-sm" id="drop-pick">Choose photos</button>
+        <button class="btn btn-sm btn-ghost" id="new-blank">+ Listing without photos</button>
+      </div>
+      <input type="file" id="file-in" accept="image/*" multiple class="hide">
+    </div>
+    <div class="toolbar">
+      <input type="search" id="q" placeholder="Search equipment…">
+      <select id="f-cat">
+        <option value="">All categories</option>
+      </select>
+      <select id="f-status" class="hide">
+        <option value="">All statuses</option>
+        <option value="draft">Drafts</option>
+        <option value="live">Live</option>
+        <option value="sold">Sold</option>
+        <option value="withdrawn">Withdrawn</option>
+      </select>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="tab-inbox" class="hide"><div id="inbox"></div></section>
+  <section id="tab-report" class="hide"><div id="report"></div></section>
+  <section id="tab-settings" class="hide"><div id="settings-form"></div></section>
+</div>
+
+<!-- Detail modal -->
+<div class="mbg" id="m-detail"><div class="modal" id="detail"></div></div>
+<!-- Edit modal (admin) -->
+<div class="mbg" id="m-edit"><div class="modal" id="edit"></div></div>
+<!-- Sign-in modal -->
+<div class="mbg" id="m-login">
+  <div class="modal narrow">
+    <button class="x" data-close>&times;</button>
+    <h2>Staff sign in</h2>
+    <p class="sub" style="margin-bottom:14px">Ener.co employees: enter the clubhouse password to see staff prices and place holds or bids.</p>
+    <div class="field"><label>Password</label><input type="password" id="pw" autocomplete="current-password"></div>
+    <div class="actions"><button class="btn" id="pw-go" style="flex:1">Sign in</button></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const FIREBASE = 'https://enerco-field-hub-default-rtdb.firebaseio.com/';
+const DB = FIREBASE + 'warehouse/surplus/';
+
+// ── VAULT (generated by tools/build-surplus-vault.mjs — do not edit by hand) ──
+const KDF_ITER = 150000;
+const EMP_CHECK = "0ZYgFDmaZTRPRwMF.XadfFw8jNjTDqTWoBhpUZ2s2Nru1yzhyu8Rn";
+const ADMIN_VAULT = "fqw2McvhO1e1hlV4.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";
+const PUBLIC_KEY = {"kty":"RSA","n":"qJoO8wiAMBeu6JROeULBDDZnESTj2tjfqjPcJ0rkeiYIW2NSnz1QX_KZhvRgvVtPA08F0I_CRuzS-J6cWKKPyvDJskNpq7UDdnG24t0-JlxLBkCRkos4Vw9Si87KRqtXAmxZgFRBKcnGQM-oUNvbBBu9rdjEC3yDxy9cVX34uwhMJyFi9-75y3tP4Te0LmuuLe3Eq1vKnCSEPnNOxuwHvSqCjnAJWV0B6Hxv6b86sn6tlMRLpjtc5B7KUrxBMZgm5ldtbOf_twPUo4YWkCPOS47zdjkY1WMmRf6YRgCg7kcjN8DbCgBsY7McBAENJi18vJnmqw1poEmuUEX79BHZjw","e":"AQAB","alg":"RSA-OAEP-256"};
+// ── END VAULT ──
+
+const CONDITIONS = { 'Like new': 0.70, 'Good': 0.55, 'Fair': 0.40, 'For parts / repair': 0.15 };
+const CATS = { equip: 'Equipment', tool: 'Hand tools', winter: 'Winter / seasonal', ppe: 'PPE & safety', other: 'Other' };
+const DEFAULT_SETTINGS = {
+  phase: 'employee',
+  publicOpens: '',
+  empPct: 40,
+  bidIncrement: 5,
+  pickup: 'Pickup at the Long Island City warehouse by appointment. Cash, Zelle or payroll deduction (staff).',
+  contact: 'Diamond — Diamond@ener.co · 929-719-3151'
+};
+
+/* ══════════ crypto ══════════ */
+const te = new TextEncoder(), td = new TextDecoder();
+const toB64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const fromB64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function deriveKey(pw, salt) {
+  const base = await crypto.subtle.importKey('raw', te.encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: te.encode(salt), iterations: KDF_ITER },
+    base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function seal(key, obj) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(JSON.stringify(obj)));
+  return toB64(iv) + '.' + toB64(ct);
+}
+async function unseal(key, s) {
+  if (!key || !s) return null;
+  try {
+    const [iv, ct] = s.split('.');
+    return JSON.parse(td.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(iv) }, key, fromB64(ct))));
+  } catch (e) { return null; }
+}
+// Public buyers' contact details: AES key wrapped with the admin RSA public key.
+async function sealForAdmin(obj) {
+  const pub = await crypto.subtle.importKey('jwk', { ...PUBLIC_KEY, ext: true }, { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['wrapKey']);
+  const k = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+  const wrapped = await crypto.subtle.wrapKey('raw', k, pub, { name: 'RSA-OAEP' });
+  return toB64(wrapped) + ':' + await seal(k, obj);
+}
+async function unsealAsAdmin(s) {
+  try {
+    const [w, rest] = s.split(':');
+    const k = await crypto.subtle.unwrapKey('raw', fromB64(w), S.rsaPriv, { name: 'RSA-OAEP' }, { name: 'AES-GCM' }, false, ['decrypt']);
+    return unseal(k, rest);
+  } catch (e) { return null; }
+}
+
+/* ══════════ state ══════════ */
+const S = {
+  role: 'public', empKey: null, adminKey: null, rsaPriv: null, catalog: [],
+  items: {}, emp: {}, adm: {}, activity: {}, actDec: {}, inquiries: {}, inqDec: {},
+  settings: { ...DEFAULT_SETTINGS }, tab: 'listings', openId: null, editDraft: null
+};
+const isStaff = () => S.role === 'employee' || S.role === 'admin';
+const isAdmin = () => S.role === 'admin';
+
+/* ══════════ firebase REST ══════════ */
+async function api(path, method = 'GET', body) {
+  const r = await fetch(DB + path + '.json', method === 'GET' ? {} : { method, body: JSON.stringify(body) });
+  if (!r.ok) throw new Error('Save failed (' + r.status + ')');
+  return r.json();
+}
+
+async function load() {
+  try {
+    const [items, activity, settings, inquiries] = await Promise.all([
+      api('items'), api('activity'), api('settings'), isAdmin() ? api('inquiries') : Promise.resolve(null)
+    ]);
+    S.items = items || {};
+    S.activity = activity || {};
+    S.settings = { ...DEFAULT_SETTINGS, ...(settings || {}) };
+    if (isAdmin()) S.inquiries = inquiries || {};
+    await decryptAll();
+  } catch (e) { toast('Could not reach the database — check your connection'); console.error(e); }
+  render();
+}
+
+async function decryptAll() {
+  const jobs = [];
+  if (S.empKey) {
+    for (const [id, it] of Object.entries(S.items)) jobs.push(unseal(S.empKey, it.emp).then(v => { S.emp[id] = v || {}; }));
+    for (const [id, acts] of Object.entries(S.activity)) {
+      for (const [k, a] of Object.entries(acts || {})) {
+        if (S.actDec[k]) continue;
+        jobs.push(unseal(S.empKey, a.e).then(v => { if (v) S.actDec[k] = { ...v, ts: a.ts }; }));
+      }
+    }
+  }
+  if (S.adminKey) {
+    for (const [id, it] of Object.entries(S.items)) jobs.push(unseal(S.adminKey, it.adm).then(v => { S.adm[id] = v || {}; }));
+    for (const [k, q] of Object.entries(S.inquiries)) {
+      if (S.inqDec[k]) continue;
+      jobs.push(unsealAsAdmin(q.sealed).then(v => { if (v) S.inqDec[k] = v; }));
+    }
+  }
+  await Promise.all(jobs);
+}
+
+/* ══════════ auth ══════════ */
+async function signIn(pw) {
+  if (!pw) return false;
+  const adminKey = await deriveKey(pw, 'ener-surplus-admin-v1');
+  const vault = await unseal(adminKey, ADMIN_VAULT);
+  if (vault) {
+    const { key_ops, ...jwk } = vault.rsaPrivateJwk;
+    const rsaPriv = await crypto.subtle.importKey('jwk', jwk, { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['unwrapKey']);
+    const empKey = await deriveKey(vault.employeePassword, 'ener-surplus-employee-v1');
+    Object.assign(S, { role: 'admin', adminKey, empKey, rsaPriv, catalog: vault.catalog || [] });
+  } else {
+    const empKey = await deriveKey(pw, 'ener-surplus-employee-v1');
+    if (!(await unseal(empKey, EMP_CHECK))) return false;
+    S.role = 'employee'; S.empKey = empKey;
+  }
+  try { sessionStorage.setItem('ener_surplus_pw', pw); } catch (e) {}
+  return true;
+}
+function signOut() {
+  try { sessionStorage.removeItem('ener_surplus_pw'); } catch (e) {}
+  location.reload();
+}
+
+/* ══════════ helpers ══════════ */
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+const money = n => (n == null || n === '' || isNaN(n)) ? '—' : '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: Number(n) % 1 ? 2 : 0 });
+const money0 = n => '$' + Math.round(Number(n) || 0).toLocaleString();
+const num = v => { const n = parseFloat(v); return isNaN(n) ? null : n; };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+function ago(ts) {
+  const m = Math.floor((Date.now() - ts) / 60000);
+  if (m < 1) return 'just now'; if (m < 60) return m + 'm ago';
+  const h = Math.floor(m / 60); if (h < 24) return h + 'h ago';
+  return Math.floor(h / 24) + 'd ago';
+}
+function fmtDate(d) { if (!d) return ''; const x = new Date(d + 'T12:00:00'); return x.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }); }
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2600); }
+function myName() {
+  try {
+    const saved = localStorage.getItem('ener_surplus_name'); if (saved) return saved;
+    const fs = JSON.parse(localStorage.getItem('enerco_field_session') || 'null');
+    return (fs && (fs.name || fs.username)) || '';
+  } catch (e) { return ''; }
+}
+function staffPrice(id) {
+  const e = S.emp[id] || {};
+  if (e.price != null) return e.price;
+  const it = S.items[id];
+  return it && it.publicPrice != null ? Math.round(it.publicPrice * S.settings.empPct / 100) : null;
+}
+function acts(id) {
+  return Object.entries(S.activity[id] || {}).map(([k, a]) => ({ key: k, ts: a.ts, ...(S.actDec[k] || {}) })).sort((a, b) => a.ts - b.ts);
+}
+function topBid(id) { return acts(id).filter(a => a.kind === 'bid').reduce((m, a) => (!m || a.amount > m.amount) ? a : m, null); }
+function holder(id) { return acts(id).find(a => a.kind === 'hold') || null; }
+const hasStaffActivity = id => Object.keys(S.activity[id] || {}).length > 0;
+
+// What a given viewer sees for an item: null = hidden.
+function visibleTo(it) {
+  if (isAdmin()) return true;
+  if (it.status === 'draft' || it.status === 'withdrawn') return false;
+  return true;
+}
+function availability(id) {
+  const it = S.items[id];
+  if (it.status === 'sold') return { cls: 'sold', label: 'Sold', open: false };
+  if (it.status === 'draft') return { cls: 'draft', label: 'Draft', open: false };
+  if (it.status === 'withdrawn') return { cls: 'draft', label: 'Withdrawn', open: false };
+  if (!isStaff()) {
+    if (S.settings.phase !== 'public') return { cls: '', label: 'Staff preview', open: false };
+    if (hasStaffActivity(id)) return { cls: 'hold', label: it.mode === 'bid' ? 'Pending staff sale' : 'On hold', open: false };
+    return { cls: '', label: 'Available', open: true };
+  }
+  if (it.mode === 'bid') { const t = topBid(id); return { cls: 'bid', label: t ? 'High bid ' + money(t.amount) : 'Open for bids', open: true }; }
+  const h = holder(id); if (h) return { cls: 'hold', label: 'Held by ' + h.name, open: true };
+  return { cls: '', label: 'Available', open: true };
+}
+
+/* ══════════ render ══════════ */
+function render() {
+  renderHeader(); renderBanner(); renderFilters(); renderGrid();
+  if (isAdmin()) { renderInbox(); renderReport(); renderSettings(); }
+  if (S.openId && document.getElementById('m-detail').classList.contains('show')) renderDetail(S.openId);
+}
+function renderHeader() {
+  const b = document.getElementById('role-btn');
+  b.className = 'role ' + S.role;
+  b.textContent = S.role === 'admin' ? 'Admin · sign out' : S.role === 'employee' ? 'Staff · sign out' : 'Staff sign in';
+  document.getElementById('tabs').classList.toggle('hide', !isAdmin());
+  document.getElementById('drop').classList.toggle('hide', !isAdmin() || S.tab !== 'listings');
+  document.getElementById('f-status').classList.toggle('hide', !isAdmin());
+  const n = Object.keys(S.inquiries).filter(k => !S.inquiries[k].done).length;
+  const badge = document.getElementById('inbox-n'); badge.textContent = n; badge.classList.toggle('hide', !n);
+}
+function renderBanner() {
+  const st = S.settings, el = document.getElementById('banner');
+  const opens = st.publicOpens ? fmtDate(st.publicOpens) : 'soon';
+  if (isStaff()) {
+    el.innerHTML = `<div class="banner banner-staff"><b>Staff first.</b> You're seeing employee pricing, usually about ${100 - st.empPct}% off the public price. ` +
+      (st.phase === 'public' ? 'The sale is now also open to the public, so grab what you want.' : `Holds and bids are open to employees only until the public sale opens <b>${esc(opens)}</b>.`) +
+      `<br><span style="font-size:.82rem">${esc(st.pickup)}</span></div>`;
+  } else if (st.phase === 'public') {
+    el.innerHTML = `<div class="banner banner-public"><b>Now open to the public.</b> Prices are based on what this equipment sells for used. ${esc(st.pickup)}</div>`;
+  } else {
+    el.innerHTML = `<div class="banner banner-wait"><b>Employee preview underway.</b> This sale opens to the public <b>${esc(opens)}</b>. You can look around now. Requests open on that date.</div>`;
+  }
+}
+function renderFilters() {
+  const sel = document.getElementById('f-cat'), cur = sel.value;
+  const used = new Set(Object.values(S.items).filter(visibleTo).map(i => i.cat || 'other'));
+  sel.innerHTML = '<option value="">All categories</option>' + Object.entries(CATS).filter(([k]) => used.has(k)).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+  sel.value = cur;
+}
+function renderGrid() {
+  const q = document.getElementById('q').value.toLowerCase().trim();
+  const fc = document.getElementById('f-cat').value, fs = document.getElementById('f-status').value;
+  const rank = { draft: 0, live: 1, sold: 2, withdrawn: 3 };
+  const list = Object.values(S.items).filter(visibleTo)
+    .filter(i => !q || (i.title + ' ' + (i.desc || '')).toLowerCase().includes(q))
+    .filter(i => !fc || (i.cat || 'other') === fc)
+    .filter(i => !fs || i.status === fs)
+    .sort((a, b) => (rank[a.status] - rank[b.status]) || (b.created - a.created));
+  const g = document.getElementById('grid');
+  if (!list.length) {
+    g.innerHTML = `<div class="empty" style="grid-column:1/-1">${Object.keys(S.items).length ? 'Nothing matches your search.' : isAdmin() ? 'No listings yet. Drop your photos above to get started.' : 'Nothing listed yet. Check back soon.'}</div>`;
+    return;
+  }
+  g.innerHTML = list.map(cardHtml).join('');
+}
+function priceHtml(id, big) {
+  const it = S.items[id];
+  if (isStaff()) {
+    const sp = staffPrice(id), pub = it.publicPrice;
+    const off = sp != null && pub ? Math.round((1 - sp / pub) * 100) : null;
+    const lead = it.mode === 'bid' ? (topBid(id) ? 'High bid' : 'Bids from') : 'Staff price';
+    const shown = it.mode === 'bid' ? (topBid(id)?.amount ?? (S.emp[id]?.minBid ?? sp)) : sp;
+    return `<div class="price"><span class="im">${lead}</span><span class="p-main p-staff">${money(shown)}</span>` +
+      (pub ? `<span class="p-strike">${money(pub)}</span>` : '') + (off > 0 && it.mode !== 'bid' ? `<span class="p-off">${off}% off</span>` : '') + `</div>`;
+  }
+  return `<div class="price"><span class="p-main">${money(it.publicPrice)}</span>${it.retailNew ? `<span class="p-strike">${money(it.retailNew)} new</span>` : ''}</div>`;
+}
+function compHtml(it) {
+  if (it.compLow == null && it.compHigh == null) return '';
+  const range = it.compLow != null && it.compHigh != null && it.compLow !== it.compHigh ? `${money(it.compLow)}–${money(it.compHigh)}` : money(it.compLow ?? it.compHigh);
+  return `<div class="comp">Sells used for ${range}${it.compSource ? ' · ' + esc(it.compSource) : ''}</div>`;
+}
+function cardHtml(it) {
+  const av = availability(it.id);
+  const thumb = it.thumb ? `<div class="thumb" style="background-image:url('${it.thumb}')">` : `<div class="thumb none">No photo yet`;
+  return `<div class="item ${av.cls === 'sold' || av.label === 'Withdrawn' ? 'dim' : ''}" data-id="${esc(it.id)}">
+    ${thumb}<span class="tag ${av.cls}">${esc(av.label)}</span>${it.photoCount > 1 ? `<span class="pc">📷 ${it.photoCount}</span>` : ''}</div>
+    <div class="ib">
+      <div class="it">${esc(it.title || 'Untitled listing')}</div>
+      <div class="im">${esc(it.condition || '')}${it.qty > 1 ? ' · qty ' + it.qty : ''}${it.mode === 'bid' && isStaff() ? ' · bidding' : ''}</div>
+      ${compHtml(it)}
+      ${priceHtml(it.id)}
+      ${isAdmin() ? `<div class="comp" style="color:#b91c1c">Paid ${money(S.adm[it.id]?.paid)}${(it.qty || 1) > 1 ? ' ea' : ''}</div>` : ''}
+    </div></div>`;
+}
+
+/* ══════════ detail ══════════ */
+async function openDetail(id) {
+  S.openId = id; S.gallery = null; S.galIdx = 0;
+  renderDetail(id);
+  document.getElementById('m-detail').classList.add('show');
+  try { S.gallery = (await api('photos/' + id)) || []; } catch (e) { S.gallery = []; }
+  if (S.openId === id) renderDetail(id);
+}
+function renderDetail(id) {
+  const it = S.items[id]; if (!it) return closeModals();
+  const av = availability(id);
+  const photos = S.gallery && S.gallery.length ? S.gallery : (it.thumb ? [it.thumb] : []);
+  const idx = Math.min(S.galIdx || 0, Math.max(0, photos.length - 1));
+  const gal = photos.length ? `<div class="gal"><img class="gal-main" src="${photos[idx]}" alt="">` +
+    (photos.length > 1 ? `<div class="gal-strip">${photos.map((p, i) => `<img src="${p}" data-gi="${i}" class="${i === idx ? 'on' : ''}" alt="">`).join('')}</div>` : '') + `</div>` : '';
+  const rows = [
+    ['Condition', esc(it.condition || '—')],
+    it.qty > 1 ? ['Quantity', it.qty] : null,
+    ['Category', CATS[it.cat] || 'Other'],
+    it.retailNew ? ['New retail', money(it.retailNew)] : null,
+    (it.compLow != null || it.compHigh != null) ? ['Used comparables', compHtml(it).replace(/<\/?div[^>]*>/g, '').replace('Sells used for ', '')] : null,
+    isStaff() ? ['Public price', money(it.publicPrice)] : null,
+  ].filter(Boolean);
+  let actionBox = '';
+  if (isStaff()) actionBox = staffBox(id, av);
+  else if (av.open) actionBox = publicBox(id);
+  else if (S.settings.phase !== 'public' && it.status === 'live') actionBox = `<div class="box"><h3>Want this?</h3><div style="font-size:.86rem;color:#6b7280">Requests open ${esc(S.settings.publicOpens ? fmtDate(S.settings.publicOpens) : 'soon')}, once the employee preview ends.</div></div>`;
+  const adminBox = isAdmin() ? adminDetailBox(id) : '';
+  document.getElementById('detail').innerHTML = `
+    <button class="x" data-close>&times;</button>
+    <h2>${esc(it.title || 'Untitled listing')}</h2>
+    <div class="im"><span class="tag ${av.cls}" style="position:static;box-shadow:none;border:1px solid #e5e5e5">${esc(av.label)}</span></div>
+    ${gal}
+    ${priceHtml(id)}
+    ${it.desc ? `<div class="desc">${esc(it.desc)}</div>` : ''}
+    <dl class="kv">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+    ${actionBox}${adminBox}
+    <div class="note-s">${esc(S.settings.pickup)}<br>Questions: ${esc(S.settings.contact)}</div>`;
+}
+function staffBox(id, av) {
+  const it = S.items[id], list = acts(id), me = myName();
+  const nameField = `<div class="field"><label>Your name</label><input id="a-name" value="${esc(me)}" placeholder="First and last name"></div>`;
+  const log = list.length ? list.map(a => {
+    const isTop = it.mode === 'bid' ? topBid(id)?.key === a.key : holder(id)?.key === a.key;
+    return `<div class="act ${isTop ? 'top' : ''}"><span>${esc(a.name || '?')} — ${a.kind === 'bid' ? 'bid ' + money(a.amount) : 'hold'}${a.note ? ' · ' + esc(a.note) : ''}</span>
+      <span class="t">${ago(a.ts)}${(isAdmin() || (me && a.name === me)) && it.status === 'live' ? ` <button class="btn btn-sm btn-danger" data-unact="${esc(a.key)}">${isAdmin() ? 'Remove' : 'Cancel'}</button>` : ''}</span></div>`;
+  }).join('') : `<div class="act"><span class="t">No ${it.mode === 'bid' ? 'bids' : 'holds'} yet.</span></div>`;
+  if (!av.open) return `<div class="box"><h3>Staff activity</h3>${log}</div>`;
+  if (it.mode === 'bid') {
+    const t = topBid(id), e = S.emp[id] || {};
+    const min = t ? t.amount + (Number(S.settings.bidIncrement) || 5) : (e.minBid ?? staffPrice(id) ?? 1);
+    return `<div class="box"><h3>Place a bid</h3>${nameField}
+      <div class="field"><label>Your bid (min ${money(min)})</label><input id="a-amt" type="number" inputmode="decimal" min="${min}" step="1" value="${min}"></div>
+      <div class="actions"><button class="btn" data-bid="${esc(id)}" data-min="${min}">Place bid</button></div>
+      <div class="note-s">Highest bid when bidding closes wins. Diamond will reach out to confirm.</div>
+      <h3 style="margin-top:14px">Bids</h3>${log}</div>`;
+  }
+  const h = holder(id);
+  return `<div class="box"><h3>${h ? 'Join the waitlist' : 'Place a hold'}</h3>
+    ${h ? `<div class="note-s" style="margin:0 0 10px">${esc(h.name)} has first dibs. If they pass, it goes to the next person in line.</div>` : ''}
+    ${nameField}
+    <div class="field"><label>Note (optional)</label><input id="a-note" placeholder="e.g. can pick up Friday"></div>
+    <div class="actions"><button class="btn" data-hold="${esc(id)}">${h ? 'Add me to the waitlist' : 'Hold it for me — ' + money(staffPrice(id))}</button></div>
+    <h3 style="margin-top:14px">Line</h3>${log}</div>`;
+}
+function publicBox(id) {
+  return `<div class="box"><h3>Request to buy</h3>
+    <div class="f2"><div class="field"><label>Name</label><input id="p-name" autocomplete="name"></div>
+    <div class="field"><label>Phone or email</label><input id="p-contact" autocomplete="email"></div></div>
+    <div class="field"><label>Your offer</label><input id="p-offer" type="number" inputmode="decimal" value="${S.items[id].publicPrice ?? ''}"><div class="hint">Asking price is ${money(S.items[id].publicPrice)}. Reasonable offers are considered.</div></div>
+    <div class="field"><label>Message (optional)</label><textarea id="p-msg" rows="2"></textarea></div>
+    <div class="actions"><button class="btn btn-dark" data-inquire="${esc(id)}">Send request</button></div>
+    <div class="note-s">Only Ener.co can read your contact details.</div></div>`;
+}
+function adminDetailBox(id) {
+  const a = S.adm[id] || {}, it = S.items[id];
+  return `<div class="box" style="border-color:#fca5a5"><h3 style="color:#b91c1c">Admin</h3>
+    <dl class="kv" style="margin:0 0 10px"><dt>Paid</dt><dd>${money(a.paid)}${(it.qty || 1) > 1 ? ` × ${it.qty} = ${money(a.paid * it.qty)}` : ''}${a.store ? ' · ' + esc(a.store) : ''}</dd>
+    <dt>Staff price</dt><dd>${money(staffPrice(id))}</dd>
+    ${it.status === 'sold' ? `<dt>Sold</dt><dd>${money(a.soldPrice)} to ${esc(a.soldTo || '?')} (${esc(a.soldChannel || '')})</dd>` : ''}
+    ${a.notes ? `<dt>Notes</dt><dd>${esc(a.notes)}</dd>` : ''}</dl>
+    <div class="actions" style="margin-top:0"><button class="btn btn-sm btn-dark" data-edit="${esc(id)}">Edit listing</button>
+    ${it.status !== 'sold' ? `<button class="btn btn-sm" data-sell="${esc(id)}">Mark sold…</button>` : `<button class="btn btn-sm btn-ghost" data-unsell="${esc(id)}">Undo sold</button>`}</div></div>`;
+}
+
+/* ══════════ staff + public actions ══════════ */
+async function addActivity(id, data) {
+  const name = (document.getElementById('a-name')?.value || '').trim();
+  if (!name) { toast('Add your name first'); return; }
+  try { localStorage.setItem('ener_surplus_name', name); } catch (e) {}
+  const ts = Date.now();
+  const res = await api('activity/' + id, 'POST', { ts, e: await seal(S.empKey, { name, ...data }) });
+  (S.activity[id] ||= {})[res.name] = { ts };
+  S.actDec[res.name] = { name, ...data, ts };
+  render(); toast(data.kind === 'bid' ? 'Bid placed' : 'You\'re on the list');
+}
+async function removeActivity(id, key) {
+  if (!confirm(isAdmin() ? 'Remove this entry?' : 'Cancel your hold/bid?')) return;
+  await api('activity/' + id + '/' + key, 'DELETE');
+  delete S.activity[id]?.[key]; delete S.actDec[key];
+  render();
+}
+async function sendInquiry(id) {
+  const name = document.getElementById('p-name').value.trim(), contact = document.getElementById('p-contact').value.trim();
+  if (!name || !contact) { toast('Please add your name and a phone or email'); return; }
+  const payload = { name, contact, offer: num(document.getElementById('p-offer').value), msg: document.getElementById('p-msg').value.trim() };
+  await api('inquiries', 'POST', { item: id, ts: Date.now(), sealed: await sealForAdmin(payload) });
+  document.querySelector('[data-inquire]').closest('.box').innerHTML = '<h3>Request sent</h3><div style="font-size:.9rem">Thanks! We\'ll get back to you soon.</div>';
+}
+
+/* ══════════ admin: photos ══════════ */
+function loadImage(file) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); res(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error(file.name)); };
+    img.src = url;
+  });
+}
+function shrink(img, max, q) {
+  const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+  const c = document.createElement('canvas');
+  c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', q);
+}
+async function processFiles(files) {
+  const out = [], bad = [];
+  for (const f of files) {
+    try { const img = await loadImage(f); out.push({ full: shrink(img, 1400, 0.78), thumb: shrink(img, 480, 0.7) }); }
+    catch (e) { bad.push(f.name); }
+  }
+  if (bad.length) toast(`Couldn't read ${bad.length} photo(s)${bad.some(n => /heic$/i.test(n)) ? '. HEIC only opens in Safari, so upload from your iPhone or export as JPEG' : ''}`);
+  return out;
+}
+async function dumpPhotos(files) {
+  files = [...files].filter(f => f.type.startsWith('image/') || /\.(heic|heif)$/i.test(f.name));
+  if (!files.length) return;
+  toast(`Processing ${files.length} photo(s)…`);
+  const pics = await processFiles(files);
+  if (!pics.length) return;
+  const groups = document.getElementById('drop-group').checked ? [pics] : pics.map(p => [p]);
+  for (const g of groups) {
+    const id = uid();
+    const item = { id, title: '', cat: 'equip', condition: 'Good', qty: 1, desc: '', mode: 'fixed', status: 'draft', created: Date.now(), updated: Date.now(),
+      thumb: g[0].thumb, photoCount: g.length, publicPrice: null, emp: await seal(S.empKey, {}), adm: await seal(S.adminKey, {}) };
+    await api('photos/' + id, 'PUT', g.map(p => p.full));
+    await api('items/' + id, 'PUT', item);
+    S.items[id] = item; S.emp[id] = {}; S.adm[id] = {};
+  }
+  document.getElementById('file-in').value = '';
+  render();
+  toast(`${groups.length} draft listing(s) created. Open each to fill in details`);
+}
+
+/* ══════════ admin: edit ══════════ */
+async function openEdit(id) {
+  const it = id ? S.items[id] : null;
+  let photos = [];
+  if (it) { try { photos = (await api('photos/' + id)) || []; } catch (e) {} }
+  S.editDraft = { id: it ? id : uid(), isNew: !it, photos, ...(it || { title: '', cat: 'equip', condition: 'Good', qty: 1, mode: 'fixed', status: 'draft', created: Date.now() }),
+    e: { ...(it ? S.emp[id] : {}) }, a: { ...(it ? S.adm[id] : {}) } };
+  document.getElementById('m-detail').classList.remove('show');
+  renderEdit();
+  document.getElementById('m-edit').classList.add('show');
+}
+function suggestion(d) {
+  const paid = num(d.a.paid), f = CONDITIONS[d.condition] ?? 0.5;
+  const base = num(d.retailNew) ?? paid;
+  const compMid = d.compLow != null && d.compHigh != null ? (Number(d.compLow) + Number(d.compHigh)) / 2 : (d.compLow ?? d.compHigh);
+  const pub = compMid != null ? Math.round(compMid) : base != null ? Math.round(base * f) : null;
+  return { pub, staff: pub != null ? Math.round(pub * S.settings.empPct / 100) : null, basis: compMid != null ? 'the middle of the used comparables' : base != null ? `${Math.round(f * 100)}% of new (${d.condition})` : null };
+}
+function renderEdit() {
+  const d = S.editDraft, sg = suggestion(d);
+  const v = x => x == null ? '' : esc(x);
+  document.getElementById('edit').innerHTML = `
+    <button class="x" data-close>&times;</button>
+    <h2>${d.isNew ? 'New listing' : 'Edit listing'}</h2>
+    <div class="sect">Photos</div>
+    <div class="ph-edit">${d.photos.map((p, i) => `<div><img src="${p}" alt=""><button data-rmph="${i}" title="Remove">✕</button></div>`).join('')}
+      <label class="btn btn-sm btn-ghost" style="display:flex;align-items:center;height:63px">+ Add<input type="file" accept="image/*" multiple class="hide" id="e-addph"></label></div>
+    <div class="sect">What is it</div>
+    <div class="field"><label>Match to kit inventory (fills in what we paid)</label>
+      <input id="e-cat-q" placeholder="Search ${S.catalog.length} inventory items… e.g. Graco, pressure washer" autocomplete="off">
+      <div class="cat-res" id="e-cat-res"></div>
+      ${d.a.catalogId ? `<div class="hint">Matched: ${esc(S.catalog.find(c => c.id === d.a.catalogId)?.name || d.a.catalogId)}</div>` : ''}</div>
+    <div class="field"><label>Title</label><input data-k="title" value="${v(d.title)}"></div>
+    <div class="f3">
+      <div class="field"><label>Category</label><select data-k="cat">${Object.entries(CATS).map(([k, l]) => `<option value="${k}" ${d.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      <div class="field"><label>Condition</label><select data-k="condition">${Object.keys(CONDITIONS).map(c => `<option ${d.condition === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Quantity</label><input data-k="qty" type="number" min="1" value="${v(d.qty || 1)}"></div>
+    </div>
+    <div class="field"><label>Description</label><textarea data-k="desc" rows="3" placeholder="Model, what's included, any wear or issues">${v(d.desc)}</textarea></div>
+    <div class="sect">Public pricing (real comparables)</div>
+    <div class="f3">
+      <div class="field"><label>Used comps — low</label><input data-k="compLow" type="number" value="${v(d.compLow)}"></div>
+      <div class="field"><label>Used comps — high</label><input data-k="compHigh" type="number" value="${v(d.compHigh)}"></div>
+      <div class="field"><label>New retail</label><input data-k="retailNew" type="number" value="${v(d.retailNew)}"></div>
+    </div>
+    <div class="field"><label>Comparable source</label><input data-k="compSource" value="${v(d.compSource)}" placeholder="e.g. eBay sold listings, Oct 2026"></div>
+    ${sg.pub != null ? `<div class="sugg">Suggested: public <b>${money(sg.pub)}</b> (${sg.basis}) · staff <b>${money(sg.staff)}</b> (${S.settings.empPct}% of public). <button class="btn btn-sm" data-usesugg>Use these</button></div>` : ''}
+    <div class="f2">
+      <div class="field"><label>Public price</label><input data-k="publicPrice" type="number" value="${v(d.publicPrice)}"></div>
+      <div class="field"><label>Sale type</label><select data-k="mode"><option value="fixed" ${d.mode === 'fixed' ? 'selected' : ''}>Fixed price, staff place holds</option><option value="bid" ${d.mode === 'bid' ? 'selected' : ''}>Staff bid on it</option></select></div>
+    </div>
+    <div class="sect">Staff pricing (encrypted, staff only)</div>
+    <div class="f2">
+      <div class="field"><label>Staff price</label><input data-e="price" type="number" value="${v(d.e.price)}" placeholder="${sg.staff ?? ''}"><div class="hint">Blank = ${S.settings.empPct}% of public price</div></div>
+      <div class="field ${d.mode === 'bid' ? '' : 'hide'}"><label>Starting bid</label><input data-e="minBid" type="number" value="${v(d.e.minBid)}"></div>
+    </div>
+    <div class="sect adm">What we paid (encrypted, admin only)</div>
+    <div class="f2">
+      <div class="field"><label>Paid per unit</label><input data-a="paid" type="number" value="${v(d.a.paid)}"></div>
+      <div class="field"><label>Bought from</label><input data-a="store" value="${v(d.a.store)}"></div>
+    </div>
+    <div class="field"><label>Private notes</label><input data-a="notes" value="${v(d.a.notes)}"></div>
+    <div class="sect">Visibility</div>
+    <div class="field"><select data-k="status">
+      <option value="draft" ${d.status === 'draft' ? 'selected' : ''}>Draft (admins only)</option>
+      <option value="live" ${d.status === 'live' ? 'selected' : ''}>Live (staff now, public when the sale opens)</option>
+      <option value="sold" ${d.status === 'sold' ? 'selected' : ''}>Sold</option>
+      <option value="withdrawn" ${d.status === 'withdrawn' ? 'selected' : ''}>Withdrawn (keeping it / scrapped)</option></select></div>
+    <div class="actions">
+      <button class="btn" data-save style="flex:1">Save</button>
+      ${d.isNew ? '' : '<button class="btn btn-danger" data-del>Delete</button>'}
+    </div>`;
+}
+function readEditFields() {
+  const d = S.editDraft, box = document.getElementById('edit');
+  const numeric = new Set(['qty', 'compLow', 'compHigh', 'retailNew', 'publicPrice', 'price', 'minBid', 'paid']);
+  box.querySelectorAll('[data-k],[data-e],[data-a]').forEach(el => {
+    const [bag, k] = el.dataset.k ? [d, el.dataset.k] : el.dataset.e ? [d.e, el.dataset.e] : [d.a, el.dataset.a];
+    bag[k] = numeric.has(k) ? num(el.value) : el.value.trim();
+  });
+  if (!d.qty || d.qty < 1) d.qty = 1;
+}
+async function saveEdit() {
+  readEditFields();
+  const d = S.editDraft;
+  if (d.status === 'live' && (!d.title || d.publicPrice == null)) { toast('A live listing needs a title and a public price'); return; }
+  const btn = document.querySelector('#edit [data-save]'); btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const { e, a, photos, isNew, ...rest } = d;
+    let thumb = rest.thumb || null;
+    if (photos.length) { const img = await loadImage(await (await fetch(photos[0])).blob()); thumb = shrink(img, 480, 0.7); } else thumb = null;
+    const clean = o => Object.fromEntries(Object.entries(o).filter(([, x]) => x !== null && x !== ''));
+    const item = { ...rest, thumb, photoCount: photos.length, updated: Date.now(), emp: await seal(S.empKey, clean(e)), adm: await seal(S.adminKey, clean(a)) };
+    await api('photos/' + d.id, 'PUT', photos.length ? photos : null);
+    await api('items/' + d.id, 'PUT', item);
+    S.items[d.id] = item; S.emp[d.id] = clean(e); S.adm[d.id] = clean(a);
+    closeModals(); render(); toast('Saved');
+  } catch (err) { toast(err.message); btn.disabled = false; btn.textContent = 'Save'; }
+}
+async function deleteItem() {
+  const d = S.editDraft;
+  if (!confirm(`Delete "${d.title || 'this listing'}" and its photos? This can't be undone.`)) return;
+  await Promise.all([api('items/' + d.id, 'DELETE'), api('photos/' + d.id, 'DELETE'), api('activity/' + d.id, 'DELETE')]);
+  delete S.items[d.id]; delete S.activity[d.id];
+  closeModals(); render(); toast('Deleted');
+}
+function catalogSearch(q) {
+  const res = document.getElementById('e-cat-res');
+  q = q.toLowerCase().trim();
+  if (!q) { res.classList.remove('show'); return; }
+  const hits = S.catalog.filter(c => c.name.toLowerCase().includes(q)).slice(0, 12);
+  res.innerHTML = hits.length ? hits.map(c => `<div data-cat="${esc(c.id)}"><span>${esc(c.name)}</span><b>${money(c.paid)}</b></div>`).join('') : '<div style="color:#9ca3af">No matches. Enter what we paid by hand below.</div>';
+  res.classList.add('show');
+}
+function pickCatalog(cid) {
+  readEditFields();
+  const c = S.catalog.find(x => x.id === cid), d = S.editDraft;
+  if (!c) return;
+  d.a.catalogId = c.id; d.a.paid = c.paid; d.a.store = c.store;
+  if (!d.title) d.title = c.name.replace(/\s*\(\s*Kit [A-D][^)]*\)/gi, '').replace(/\s*\[[^\]]*\]/g, '').replace(/\s+\d{1,2}\/\d{1,2}(\s*\+\s*\d{1,2}\/\d{1,2})?\s*$/, '').replace(/^\*+\s*/, '').trim();
+  if (d.retailNew == null) d.retailNew = c.paid;
+  if (c.compLow != null && d.compLow == null && d.compHigh == null) { d.compLow = c.compLow; d.compHigh = c.compHigh; d.compSource = c.compSource; }
+  if (CATS[c.cat]) d.cat = c.cat;
+  renderEdit();
+}
+
+/* ══════════ admin: sold ══════════ */
+async function markSold(id) {
+  const it = S.items[id], list = acts(id);
+  const lead = it.mode === 'bid' ? topBid(id) : holder(id);
+  const to = prompt('Sold to (name):', lead?.name || ''); if (to === null) return;
+  const channel = prompt('Channel: staff, public, scrap or donate', lead ? 'staff' : (S.settings.phase === 'public' ? 'public' : 'staff')); if (channel === null) return;
+  const dflt = lead?.kind === 'bid' ? lead.amount : channel === 'staff' ? staffPrice(id) : channel === 'public' ? it.publicPrice : 0;
+  const price = num(prompt('Final price per unit ($):', dflt ?? '')); if (price === null) return;
+  const a = { ...S.adm[id], soldTo: to, soldChannel: channel.toLowerCase(), soldPrice: price, soldAt: Date.now() };
+  await api('items/' + id, 'PATCH', { status: 'sold', updated: Date.now(), adm: await seal(S.adminKey, a) });
+  S.items[id].status = 'sold'; S.adm[id] = a; render(); toast('Marked sold');
+}
+async function unSell(id) {
+  const { soldTo, soldChannel, soldPrice, soldAt, ...a } = S.adm[id];
+  await api('items/' + id, 'PATCH', { status: 'live', updated: Date.now(), adm: await seal(S.adminKey, a) });
+  S.items[id].status = 'live'; S.adm[id] = a; render();
+}
+
+/* ══════════ admin: inbox ══════════ */
+function renderInbox() {
+  const list = Object.entries(S.inquiries).sort((a, b) => b[1].ts - a[1].ts);
+  document.getElementById('inbox').innerHTML = list.length ? list.map(([k, q]) => {
+    const d = S.inqDec[k] || {}, it = S.items[q.item];
+    return `<div class="inq" style="${q.done ? 'opacity:.55' : ''}"><div class="top"><b>${esc(it?.title || 'Deleted listing')}</b><span class="t">${ago(q.ts)}</span></div>
+      <div>${esc(d.name || '(could not decrypt)')} · ${esc(d.contact || '')} · offer <b>${money(d.offer)}</b>${it ? ` (asking ${money(it.publicPrice)})` : ''}</div>
+      ${d.msg ? `<div class="note-s" style="margin-top:4px">"${esc(d.msg)}"</div>` : ''}
+      <div class="actions" style="margin-top:8px"><button class="btn btn-sm btn-ghost" data-inqdone="${esc(k)}">${q.done ? 'Mark open' : 'Mark handled'}</button>
+      <button class="btn btn-sm btn-danger" data-inqdel="${esc(k)}">Delete</button></div></div>`;
+  }).join('') : '<div class="empty">No public requests yet.</div>';
+}
+
+/* ══════════ admin: loss report ══════════ */
+function reportRows() {
+  return Object.values(S.items).filter(i => i.status !== 'draft' || S.adm[i.id]?.paid != null).map(it => {
+    const a = S.adm[it.id] || {}, q = it.qty || 1;
+    const cost = (a.paid || 0) * q;
+    const staff = (staffPrice(it.id) || 0) * q, pub = (it.publicPrice || 0) * q;
+    let expected, basis;
+    if (it.status === 'sold') { expected = (a.soldPrice || 0) * q; basis = 'Sold (' + (a.soldChannel || '?') + ')'; }
+    else if (it.status === 'withdrawn') { expected = 0; basis = 'Withdrawn'; }
+    else if (it.mode === 'bid' && topBid(it.id)) { expected = topBid(it.id).amount * q; basis = 'High bid'; }
+    else if (hasStaffActivity(it.id)) { expected = staff; basis = 'Staff hold'; }
+    else { expected = Math.round(staff * 0.6 + pub * 0.4); basis = 'Projected'; }
+    return { it, a, q, cost, staff, pub, expected, basis };
+  });
+}
+function renderReport() {
+  const rows = reportRows();
+  const sum = k => rows.reduce((s, r) => s + r[k], 0);
+  const cost = sum('cost'), staff = sum('staff'), pub = sum('pub'), exp = sum('expected');
+  const missing = rows.filter(r => !r.a.paid).length;
+  const pct = x => cost ? Math.round(x / cost * 100) + '% of cost' : '';
+  document.getElementById('report').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="l">What we paid</div><div class="v">${money0(cost)}</div><div class="s">${rows.length} listings${missing ? ` · <span class="neg">${missing} missing a cost</span>` : ''}</div></div>
+      <div class="stat"><div class="l">If all sold to staff</div><div class="v">${money0(staff)}</div><div class="s">Loss ${money0(cost - staff)} · ${pct(cost - staff)}</div></div>
+      <div class="stat"><div class="l">If all sold to public</div><div class="v">${money0(pub)}</div><div class="s">Loss ${money0(cost - pub)} · ${pct(cost - pub)}</div></div>
+      <div class="stat loss"><div class="l">Projected loss</div><div class="v">${money0(cost - exp)}</div><div class="s">Recover ${money0(exp)} · ${pct(cost - exp)}</div></div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Item</th><th class="n">Qty</th><th class="n">Paid</th><th class="n">Staff</th><th class="n">Public</th><th>Basis</th><th class="n">Expected</th><th class="n">Loss</th></tr></thead>
+      <tbody>${rows.sort((x, y) => (y.cost - y.expected) - (x.cost - x.expected)).map(r => `<tr>
+        <td>${esc(r.it.title || 'Untitled')}${r.it.status === 'draft' ? ' <span class="tag draft" style="position:static">draft</span>' : ''}</td>
+        <td class="n">${r.q}</td><td class="n">${r.a.paid ? money0(r.cost) : '<span class="neg">?</span>'}</td>
+        <td class="n">${money0(r.staff)}</td><td class="n">${money0(r.pub)}</td><td>${r.basis}</td>
+        <td class="n">${money0(r.expected)}</td><td class="n neg">${money0(r.cost - r.expected)}</td></tr>`).join('')}</tbody>
+      <tfoot><tr><td>Total</td><td></td><td class="n">${money0(cost)}</td><td class="n">${money0(staff)}</td><td class="n">${money0(pub)}</td><td></td><td class="n">${money0(exp)}</td><td class="n neg">${money0(cost - exp)}</td></tr></tfoot>
+    </table></div>
+    <p class="note-s"><b>How "Expected" works:</b> sold items use the actual sale price. Bid items use the current high bid, and held items use the staff price. Anything still unclaimed is projected at a 60/40 mix of staff and public price. Withdrawn items count as $0 recovered. Paid amounts come from the kit inventory price list (new purchase price), so the loss here is against what we spent, not depreciated book value.</p>
+    <div class="actions no-print"><button class="btn btn-ghost" onclick="window.print()">Print / save PDF</button><button class="btn btn-ghost" id="csv">Download CSV</button></div>`;
+}
+function downloadCsv() {
+  const rows = reportRows();
+  const q = s => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+  const lines = [['Item', 'Status', 'Qty', 'Paid each', 'Paid total', 'Staff total', 'Public total', 'Basis', 'Expected', 'Loss', 'Sold to', 'Channel'].map(q).join(',')]
+    .concat(rows.map(r => [r.it.title, r.it.status, r.q, r.a.paid, r.cost, r.staff, r.pub, r.basis, r.expected, r.cost - r.expected, r.a.soldTo, r.a.soldChannel].map(q).join(',')));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
+  a.download = 'surplus-loss-report-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
+}
+
+/* ══════════ admin: settings ══════════ */
+function renderSettings() {
+  const s = S.settings;
+  document.getElementById('settings-form').innerHTML = `<div class="box" style="background:#fff;max-width:620px">
+    <h3>Sale phase</h3>
+    <div class="field"><select id="s-phase"><option value="employee" ${s.phase !== 'public' ? 'selected' : ''}>Employees only (public can look but can't request)</option><option value="public" ${s.phase === 'public' ? 'selected' : ''}>Open to the public</option></select></div>
+    <div class="f2">
+      <div class="field"><label>Public sale opens</label><input id="s-opens" type="date" value="${esc(s.publicOpens)}"></div>
+      <div class="field"><label>Default staff price (% of public)</label><input id="s-pct" type="number" min="1" max="100" value="${esc(s.empPct)}"><div class="hint">${s.empPct}% of public = ${100 - s.empPct}% off</div></div>
+    </div>
+    <div class="field"><label>Minimum bid increase ($)</label><input id="s-inc" type="number" min="1" value="${esc(s.bidIncrement)}"></div>
+    <div class="field"><label>Pickup &amp; payment</label><textarea id="s-pickup" rows="2">${esc(s.pickup)}</textarea></div>
+    <div class="field"><label>Contact line</label><input id="s-contact" value="${esc(s.contact)}"></div>
+    <div class="actions"><button class="btn" id="s-save">Save settings</button></div></div>`;
+}
+async function saveSettings() {
+  const g = id => document.getElementById(id).value;
+  S.settings = { ...S.settings, phase: g('s-phase'), publicOpens: g('s-opens'), empPct: Math.min(100, Math.max(1, num(g('s-pct')) || 40)), bidIncrement: num(g('s-inc')) || 5, pickup: g('s-pickup').trim(), contact: g('s-contact').trim() };
+  await api('settings', 'PUT', S.settings);
+  render(); toast('Settings saved');
+}
+
+/* ══════════ events ══════════ */
+function closeModals() { document.querySelectorAll('.mbg').forEach(m => m.classList.remove('show')); S.openId = null; }
+function setTab(t) {
+  S.tab = t;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  ['listings', 'inbox', 'report', 'settings'].forEach(x => document.getElementById('tab-' + x).classList.toggle('hide', x !== t));
+  renderHeader();
+}
+const guard = fn => async (...args) => { try { await fn(...args); } catch (e) { toast(e.message || 'Something went wrong'); console.error(e); } };
+
+document.getElementById('role-btn').onclick = () => {
+  if (S.role !== 'public') return signOut();
+  document.getElementById('m-login').classList.add('show');
+  setTimeout(() => document.getElementById('pw').focus(), 50);
+};
+const doLogin = guard(async () => {
+  const btn = document.getElementById('pw-go'); btn.disabled = true; btn.textContent = 'Checking…';
+  let ok;
+  try { ok = await signIn(document.getElementById('pw').value); }
+  finally { btn.disabled = false; btn.textContent = 'Sign in'; }
+  if (!ok) { toast('Wrong password'); return; }
+  closeModals(); document.getElementById('pw').value = '';
+  toast(isAdmin() ? 'Signed in as admin' : 'Welcome! Staff prices unlocked');
+  await load();
+});
+document.getElementById('pw-go').onclick = doLogin;
+document.getElementById('pw').onkeydown = e => { if (e.key === 'Enter') doLogin(); };
+document.getElementById('tabs').onclick = e => { const t = e.target.closest('.tab'); if (t) setTab(t.dataset.tab); };
+['q', 'f-cat', 'f-status'].forEach(id => document.getElementById(id).addEventListener('input', renderGrid));
+document.getElementById('grid').onclick = e => { const c = e.target.closest('.item'); if (c) openDetail(c.dataset.id); };
+
+document.querySelectorAll('.mbg').forEach(m => m.addEventListener('click', e => {
+  if (e.target === m || e.target.closest('[data-close]')) closeModals();
+}));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
+
+document.getElementById('detail').addEventListener('click', guard(async e => {
+  const t = e.target.closest('[data-gi],[data-hold],[data-bid],[data-unact],[data-inquire],[data-edit],[data-sell],[data-unsell]');
+  if (!t) return;
+  const id = S.openId;
+  if (t.dataset.gi) { S.galIdx = +t.dataset.gi; renderDetail(id); }
+  else if (t.dataset.hold) await addActivity(id, { kind: 'hold', note: document.getElementById('a-note').value.trim() });
+  else if (t.dataset.bid) {
+    const amt = num(document.getElementById('a-amt').value);
+    if (amt == null || amt < +t.dataset.min) { toast('Bid at least ' + money(+t.dataset.min)); return; }
+    await addActivity(id, { kind: 'bid', amount: amt });
+  }
+  else if (t.dataset.unact) await removeActivity(id, t.dataset.unact);
+  else if (t.dataset.inquire) await sendInquiry(id);
+  else if (t.dataset.edit) await openEdit(id);
+  else if (t.dataset.sell) await markSold(id);
+  else if (t.dataset.unsell) await unSell(id);
+}));
+
+const editBox = document.getElementById('edit');
+editBox.addEventListener('click', guard(async e => {
+  const t = e.target.closest('[data-rmph],[data-cat],[data-usesugg],[data-save],[data-del]');
+  if (!t) return;
+  if (t.dataset.rmph != null) { readEditFields(); S.editDraft.photos.splice(+t.dataset.rmph, 1); renderEdit(); }
+  else if (t.dataset.cat) pickCatalog(t.dataset.cat);
+  else if (t.hasAttribute('data-usesugg')) {
+    readEditFields(); const sg = suggestion(S.editDraft);
+    S.editDraft.publicPrice = sg.pub; S.editDraft.e.price = sg.staff; renderEdit();
+  }
+  else if (t.hasAttribute('data-save')) await saveEdit();
+  else if (t.hasAttribute('data-del')) await deleteItem();
+}));
+editBox.addEventListener('input', e => { if (e.target.id === 'e-cat-q') catalogSearch(e.target.value); });
+editBox.addEventListener('change', guard(async e => {
+  if (e.target.id === 'e-addph') {
+    readEditFields();
+    const pics = await processFiles([...e.target.files]);
+    S.editDraft.photos.push(...pics.map(p => p.full)); renderEdit();
+  } else if (['condition', 'mode', 'compLow', 'compHigh', 'retailNew'].includes(e.target.dataset.k) || e.target.dataset.a === 'paid') { readEditFields(); renderEdit(); }
+}));
+
+const drop = document.getElementById('drop'), fileIn = document.getElementById('file-in');
+document.getElementById('drop-pick').onclick = () => fileIn.click();
+document.getElementById('new-blank').onclick = guard(() => openEdit(null));
+fileIn.onchange = guard(() => dumpPhotos(fileIn.files));
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', guard(e => dumpPhotos(e.dataTransfer.files)));
+
+document.getElementById('inbox').addEventListener('click', guard(async e => {
+  const t = e.target.closest('[data-inqdone],[data-inqdel]'); if (!t) return;
+  if (t.dataset.inqdone) { const k = t.dataset.inqdone, done = !S.inquiries[k].done; await api('inquiries/' + k, 'PATCH', { done }); S.inquiries[k].done = done; }
+  else { if (!confirm('Delete this request?')) return; await api('inquiries/' + t.dataset.inqdel, 'DELETE'); delete S.inquiries[t.dataset.inqdel]; }
+  renderInbox(); renderHeader();
+}));
+document.getElementById('report').addEventListener('click', e => { if (e.target.id === 'csv') downloadCsv(); });
+document.getElementById('settings-form').addEventListener('click', guard(e => { if (e.target.id === 's-save') return saveSettings(); }));
+
+// Keep holds/bids fresh while the page is open.
+setInterval(() => { if (!document.hidden && !document.querySelector('.mbg.show')) load(); }, 30000);
+
+(async () => {
+  let pw = null; try { pw = sessionStorage.getItem('ener_surplus_pw'); } catch (e) {}
+  if (pw) await signIn(pw).catch(() => {});
+  await load();
+})();
+</script>
+</body>
+</html>
