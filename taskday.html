@@ -70,7 +70,6 @@
   }
   .block.done .step-num { background: #2e7d32; }
   .block-title { font-weight: 600; font-size: 16px; flex: 1; }
-  .block-time { font-size: 12px; color: #666; white-space: nowrap; }
 
   .task {
     display: flex;
@@ -166,7 +165,7 @@
 <div class="container">
 
   <div class="note">
-    It's just the two of us today, so we'll work on this list together. Tap a task to check it off. Both of our phones see the updates. Times are rough targets, not deadlines.
+    It's just the two of us today, so we'll work on this list together. Tap a task to check it off. Both of our phones see the updates.
   </div>
 
   <div class="who-bar">
@@ -194,7 +193,6 @@ const DAY_KEY = "2026-11-10-eli";
 const PLAN = [
   {
     title: "Opening procedures",
-    time: "10:00 – 10:20",
     tasks: [
       { id: "open-liebert", text: "Pull out the Liebert and everything stored under it" },
       { id: "open-wall",    text: "Set it all in front of the wall, same spot as usual" },
@@ -203,7 +201,6 @@ const PLAN = [
   },
   {
     title: "Labels & stickers for Kit A",
-    time: "10:20 – 11:15",
     tasks: [
       { id: "lbl-learn", text: "Learn how to make labels", tag: ["learn", "Learn"] },
       { id: "lbl-score", text: "Help score the sticker sheets for Kit A", tag: ["together", "Together"] },
@@ -212,7 +209,6 @@ const PLAN = [
   },
   {
     title: "Swap porta blasters for spray pumps",
-    time: "11:15 – 12:00",
     tasks: [
       { id: "pump-loft",  text: "Get the 1 spray pump from the fridge loft" },
       { id: "pump-kitb",  text: "Take 1 spray pump out of Kit B", tag: ["heads-up", "Kit B will be short 1"] },
@@ -222,7 +218,6 @@ const PLAN = [
   },
   {
     title: "Label the pumps",
-    time: "12:00 – 12:30",
     tasks: [
       { id: "plbl-enerco-1", text: "Pump #1: Ener.co label" },
       { id: "plbl-enerco-2", text: "Pump #2: Ener.co label" },
@@ -231,7 +226,6 @@ const PLAN = [
   },
   {
     title: "Restock & reset Kit A",
-    time: "12:30 – 2:00",
     tasks: [
       { id: "kit-restock", text: "Restock Kit A. Write anything low or missing in Notes below" },
       { id: "kit-reset",   text: "Reset Kit A so everything is in its spot and labeled" },
@@ -305,7 +299,7 @@ function render() {
       const c = state.checks[t.id];
       if (c) doneCount++;
       const tag = t.tag ? `<span class="tag tag-${t.tag[0]}">${esc(t.tag[1])}</span>` : "";
-      const meta = c ? `<div class="task-meta">✓ ${c.by ? esc(c.by) + " · " : ""}${fmt(c.at)}</div>` : "";
+      const meta = c ? `<div class="task-meta">✓ ${c.by ? esc(c.by) : "Done"}</div>` : "";
       return `<div class="task ${c ? "checked" : ""}" data-id="${t.id}">
         <div class="box">${c ? "✓" : ""}</div>
         <div><div class="task-text">${esc(t.text)}${tag}</div>${meta}</div>
@@ -315,7 +309,6 @@ function render() {
       <div class="block-head">
         <div class="step-num">${blockDone ? "✓" : i + 1}</div>
         <div class="block-title">${esc(b.title)}</div>
-        <div class="block-time">${esc(b.time)}</div>
       </div>${rows}</div>`;
   }).join("");
 
@@ -329,7 +322,6 @@ function render() {
 }
 
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function fmt(ts) { return new Date(ts).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); }
 
 // ---- Events -------------------------------------------------------------
 document.getElementById("date-line").textContent =
