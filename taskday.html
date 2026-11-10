@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eli's Task Day</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    margin: 0;
+    line-height: 1.4;
+  }
+  header {
+    background: #d32f2f;
+    color: white;
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  header p { margin: 4px 0 0; font-size: 13px; opacity: 0.9; }
+
+  .progress-wrap { margin-top: 10px; }
+  .progress-bar { height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: white; transition: width 0.25s; }
+  .progress-text { font-size: 12px; margin-top: 4px; opacity: 0.95; display: flex; justify-content: space-between; }
+
+  .container { padding: 16px; max-width: 700px; margin: 0 auto; }
+
+  .note {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+
+  .block {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .block.done { border-color: #a5d6a7; }
+  .block-head {
+    padding: 12px 14px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .block.done .block-head { background: #e8f5e9; }
+  .step-num {
+    flex: none;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #d32f2f;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    align-self: center;
+  }
+  .block.done .step-num { background: #2e7d32; }
+  .block-title { font-weight: 600; font-size: 16px; flex: 1; }
+  .block-time { font-size: 12px; color: #666; white-space: nowrap; }
+
+  .task {
+    display: flex;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #f2f2f2;
+    cursor: pointer;
+    user-select: none;
+  }
+  .task:last-child { border-bottom: none; }
+  .task:active { background: #fafafa; }
+  .box {
+    flex: none;
+    width: 24px; height: 24px;
+    border: 2px solid #bbb;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    color: white;
+    margin-top: 1px;
+  }
+  .task.checked .box { background: #2e7d32; border-color: #2e7d32; }
+  .task-text { font-size: 15px; }
+  .task.checked .task-text { color: #888; text-decoration: line-through; }
+  .task-meta { font-size: 12px; color: #2e7d32; margin-top: 2px; }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 6px;
+    margin-left: 4px;
+    vertical-align: 1px;
+  }
+  .tag-learn { background: #e3f2fd; color: #1565c0; }
+  .tag-together { background: #f3e5f5; color: #6a1b9a; }
+  .tag-heads-up { background: #fff3e0; color: #e65100; }
+
+  .who-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .who-bar label { font-size: 13px; color: #555; align-self: center; }
+  .who-bar input {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 16px;
+    border: 1px solid #d0d0d0;
+    border-radius: 10px;
+    font-family: inherit;
+  }
+
+  .notes-area {
+    width: 100%;
+    min-height: 90px;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #d0d0d0;
+    border-radius: 10px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .section-label { font-size: 13px; font-weight: 600; color: #555; margin: 20px 0 8px; }
+
+  .btn-reset {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #f0f0f0;
+    color: #555;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .sync { font-size: 12px; color: #999; text-align: center; margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Eli's Task Day</h1>
+  <p id="date-line">10:00 AM – 2:00 PM · Working in tandem</p>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-text"><span id="progress-count">0 of 0 done</span><span id="progress-pct">0%</span></div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="note">
+    It's just the two of us today, so we'll work on this list together. Tap a task to check it off. Both of our phones see the updates. Times are rough targets, not deadlines.
+  </div>
+
+  <div class="who-bar">
+    <label for="who">I am:</label>
+    <input type="text" id="who" placeholder="Your name (e.g. Eli)" autocomplete="name">
+  </div>
+
+  <div id="blocks"></div>
+
+  <div class="section-label">Notes / issues found today</div>
+  <textarea class="notes-area" id="notes" placeholder="Missing items, anything low on stock, questions..."></textarea>
+
+  <button class="btn-reset" id="reset-btn">Clear all checkmarks</button>
+  <div class="sync" id="sync">Connecting…</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+<script>
+// ---- Today's plan -------------------------------------------------------
+// To reuse for another day: change DAY_KEY and edit PLAN.
+const DAY_KEY = "2026-11-10-eli";
+
+const PLAN = [
+  {
+    title: "Opening procedures",
+    time: "10:00 – 10:20",
+    tasks: [
+      { id: "open-liebert", text: "Pull out the Liebert and everything stored under it" },
+      { id: "open-wall",    text: "Set it all in front of the wall, same spot as usual" },
+      { id: "open-kita",    text: "Pull out Kit A" }
+    ]
+  },
+  {
+    title: "Labels & stickers for Kit A",
+    time: "10:20 – 11:15",
+    tasks: [
+      { id: "lbl-learn", text: "Learn how to make labels", tag: ["learn", "Learn"] },
+      { id: "lbl-score", text: "Help score the sticker sheets for Kit A", tag: ["together", "Together"] },
+      { id: "lbl-make",  text: "Help make the stickers for Kit A", tag: ["together", "Together"] }
+    ]
+  },
+  {
+    title: "Swap porta blasters for spray pumps",
+    time: "11:15 – 12:00",
+    tasks: [
+      { id: "pump-loft",  text: "Get the 1 spray pump from the fridge loft" },
+      { id: "pump-kitb",  text: "Take 1 spray pump out of Kit B", tag: ["heads-up", "Kit B will be short 1"] },
+      { id: "pump-out",   text: "Take the porta blasters out of Kit A" },
+      { id: "pump-in",    text: "Put both spray pumps in Kit A where the porta blasters were" }
+    ]
+  },
+  {
+    title: "Label the pumps",
+    time: "12:00 – 12:30",
+    tasks: [
+      { id: "plbl-enerco-1", text: "Pump #1: Ener.co label" },
+      { id: "plbl-enerco-2", text: "Pump #2: Ener.co label" },
+      { id: "plbl-nubrite",  text: "One of the pumps also gets a Nu Brite label" }
+    ]
+  },
+  {
+    title: "Restock & reset Kit A",
+    time: "12:30 – 2:00",
+    tasks: [
+      { id: "kit-restock", text: "Restock Kit A. Write anything low or missing in Notes below" },
+      { id: "kit-reset",   text: "Reset Kit A so everything is in its spot and labeled" },
+      { id: "kit-checkin", text: "Check in with me before clocking out", tag: ["together", "Together"] }
+    ]
+  }
+];
+
+// ---- State / sync -------------------------------------------------------
+const LS_KEY = "taskday:" + DAY_KEY;
+let state = loadLocal();
+let ref = null;
+
+function loadLocal() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || { checks: {}, notes: "" }; }
+  catch (e) { return { checks: {}, notes: "" }; }
+}
+function saveLocal() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function setSync(msg) { document.getElementById("sync").textContent = msg; }
+
+try {
+  firebase.initializeApp({
+    apiKey: "AIzaSyD6R0svlQBY9t8jH4lpiMVoRdmYr7iBT6s",
+    authDomain: "tool-signout-crew.firebaseapp.com",
+    databaseURL: "https://tool-signout-crew-default-rtdb.firebaseio.com",
+    projectId: "tool-signout-crew",
+    storageBucket: "tool-signout-crew.firebasestorage.app",
+    messagingSenderId: "11417927751",
+    appId: "1:11417927751:web:9c30df3a3e1213033ef162"
+  });
+  // Kept separate from "toolSignout" so it never touches the sign-out data.
+  ref = firebase.database().ref("taskDays/" + DAY_KEY);
+  ref.on("value", snap => {
+    const v = snap.val();
+    state = { checks: (v && v.checks) || {}, notes: (v && v.notes) || "" };
+    saveLocal();
+    render();
+    setSync("Live: synced with the crew");
+  }, err => {
+    ref = null;
+    setSync("Offline mode: saving on this phone only");
+  });
+} catch (e) {
+  setSync("Offline mode: saving on this phone only");
+}
+
+function toggle(id) {
+  const who = document.getElementById("who").value.trim();
+  if (state.checks[id]) {
+    delete state.checks[id];
+    if (ref) ref.child("checks/" + id).remove().catch(() => setSync("Offline mode: saving on this phone only"));
+  } else {
+    const entry = { by: who || "", at: Date.now() };
+    state.checks[id] = entry;
+    if (ref) ref.child("checks/" + id).set(entry).catch(() => setSync("Offline mode: saving on this phone only"));
+  }
+  saveLocal();
+  render();
+}
+
+// ---- Render -------------------------------------------------------------
+function render() {
+  const total = PLAN.reduce((n, b) => n + b.tasks.length, 0);
+  let doneCount = 0;
+
+  document.getElementById("blocks").innerHTML = PLAN.map((b, i) => {
+    const blockDone = b.tasks.every(t => state.checks[t.id]);
+    const rows = b.tasks.map(t => {
+      const c = state.checks[t.id];
+      if (c) doneCount++;
+      const tag = t.tag ? `<span class="tag tag-${t.tag[0]}">${esc(t.tag[1])}</span>` : "";
+      const meta = c ? `<div class="task-meta">✓ ${c.by ? esc(c.by) + " · " : ""}${fmt(c.at)}</div>` : "";
+      return `<div class="task ${c ? "checked" : ""}" data-id="${t.id}">
+        <div class="box">${c ? "✓" : ""}</div>
+        <div><div class="task-text">${esc(t.text)}${tag}</div>${meta}</div>
+      </div>`;
+    }).join("");
+    return `<div class="block ${blockDone ? "done" : ""}">
+      <div class="block-head">
+        <div class="step-num">${blockDone ? "✓" : i + 1}</div>
+        <div class="block-title">${esc(b.title)}</div>
+        <div class="block-time">${esc(b.time)}</div>
+      </div>${rows}</div>`;
+  }).join("");
+
+  const pct = total ? Math.round(doneCount / total * 100) : 0;
+  document.getElementById("progress-fill").style.width = pct + "%";
+  document.getElementById("progress-count").textContent = `${doneCount} of ${total} done`;
+  document.getElementById("progress-pct").textContent = pct + "%";
+
+  const notes = document.getElementById("notes");
+  if (document.activeElement !== notes) notes.value = state.notes || "";
+}
+
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmt(ts) { return new Date(ts).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); }
+
+// ---- Events -------------------------------------------------------------
+document.getElementById("date-line").textContent =
+  new Date(2026, 10, 10).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" }) +
+  " · 10:00 AM – 2:00 PM · Working in tandem";
+
+document.getElementById("blocks").addEventListener("click", e => {
+  const row = e.target.closest(".task");
+  if (row) toggle(row.dataset.id);
+});
+
+const whoInput = document.getElementById("who");
+try { whoInput.value = localStorage.getItem("taskday:who") || ""; } catch (e) {}
+whoInput.addEventListener("input", () => {
+  try { localStorage.setItem("taskday:who", whoInput.value.trim()); } catch (e) {}
+});
+
+let notesTimer;
+document.getElementById("notes").addEventListener("input", e => {
+  state.notes = e.target.value;
+  saveLocal();
+  clearTimeout(notesTimer);
+  notesTimer = setTimeout(() => { if (ref) ref.child("notes").set(state.notes).catch(() => {}); }, 500);
+});
+
+document.getElementById("reset-btn").addEventListener("click", () => {
+  if (!confirm("Clear every checkmark for today?")) return;
+  state.checks = {};
+  if (ref) ref.child("checks").remove().catch(() => {});
+  saveLocal();
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
